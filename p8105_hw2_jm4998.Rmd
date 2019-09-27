@@ -1,0 +1,54 @@
+---
+title: "Homework 2_Data Wrangling_jm4998"
+author: "Junhui Mi"
+date: "2019/9/24"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+```
+
+# Problem 1
+
+_Read data from Excel_
+
+```{r read_excel, warning = FALSE}
+Mr_data = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+                     sheet = 1, range = "A2:N336") %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster) %>%
+  mutate(sports_balls = as.integer(sports_balls))
+```
+
+_Join 2017 and 2018 precipitation data_
+
+```{r join_tables, warning = FALSE}
+prec_2018 = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+                     sheet = 3, range = "A2:B14") %>%
+  janitor::clean_names() %>%
+  mutate(year = rep(2018, 12), month = month.name) %>%
+  drop_na(total) 
+
+prec_2017 = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+                     sheet = 4, range = "A2:B14") %>%
+  janitor::clean_names() %>%
+  mutate(year = rep(2017, 12), month = month.name) %>%
+  drop_na(total)
+
+prec_all = full_join(prec_2018, prec_2017)
+```
+
+## Conclusions
+
+(1) Mr_data shows Mr. Trash Wheel data, with `r length(pull(Mr_data, dumpster))` observations. There are `r length(Mr_data)` key variables: `r colnames(Mr_data)`.
+
+(2) prec_all shows the combination of 2017 precipitation and 2018 precipitation data, with `r length(pull(prec_all, month))`. observations. There are `r length(prec_all)` key variables: `r colnames(prec_all)`.
+
+(3) The the total precipitation in 2018 is `r sum(pull(filter(prec_all, year == 2018), total))`.
+
+(4) The median number of sports balls in a dumpster in 2017 is `r median(pull(filter(Mr_data, year == 2017), sports_balls))`.
+
