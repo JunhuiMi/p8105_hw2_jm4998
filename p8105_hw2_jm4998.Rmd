@@ -113,3 +113,37 @@ pols_snp_unemployment = left_join(pols_snp, unemployment_2, by = "date") %>%
 (2) The resulting dataset _pols_snp_unemployment_ merges data from _pols_month_, _unemployment_ and _snp_, with `r length(pull(pols_snp_unemployment, month))` rows and `r length(pols_snp_unemployment)` columns. It contains data from year `r min(pull(pols_snp_unemployment, year))` to `r max(pull(pols_snp_unemployment, year))`.Its variables are: `r colnames(pols_snp_unemployment)`. "year" and "month" are key variables which merge into "date" to be more accurate.
 
 # Problem 3
+
+```{r name_csv, warning = FALSE}
+baby_names = read_csv(file = "../dataset/Popular_Baby_Names.csv") %>%
+  janitor::clean_names() %>%
+  mutate(childs_first_name = str_to_title(childs_first_name)) %>%
+  distinct() 
+```
+
+```{r create_table, warning = FALSE}
+baby_names_olivia = baby_names %>%
+  filter(childs_first_name == "Olivia", gender == "FEMALE") %>%
+  select(year_of_birth, ethnicity, rank) %>%
+  pivot_wider(
+    names_from = "year_of_birth",
+    values_from = "rank")
+baby_names_olivia
+
+popular_male_names = baby_names %>%
+  filter(gender == "MALE", rank == "1") %>%
+  select(year_of_birth, ethnicity, childs_first_name) %>%
+  pivot_wider(
+    names_from = "year_of_birth",
+    values_from = "childs_first_name")
+popular_male_names
+```
+
+```{r create_plot, warning = FALSE}
+plot_data = baby_names %>%
+  filter(gender == "MALE", ethnicity == "WHITE NON HISPANIC", 
+         year_of_birth == "2016")
+ggplot(plot_data, aes(x = rank, y = count)) + 
+  geom_point()
+ggsave("scatter plot of male, white non-hispanic children born in 2016.png")
+```
