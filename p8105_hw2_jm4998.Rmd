@@ -30,25 +30,86 @@ _Join 2017 and 2018 precipitation data_
 prec_2018 = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
                      sheet = 3, range = "A2:B14") %>%
   janitor::clean_names() %>%
-  mutate(year = rep(2018, 12), month = month.name) %>%
+  mutate(year = rep(2018, 12), month = month.name[as.integer(month)]) %>%
   drop_na(total) 
 
 prec_2017 = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
                      sheet = 4, range = "A2:B14") %>%
   janitor::clean_names() %>%
-  mutate(year = rep(2017, 12), month = month.name) %>%
+  mutate(year = rep(2017, 12), month = month.name[as.integer(month)]) %>%
   drop_na(total)
 
 prec_all = full_join(prec_2018, prec_2017)
 ```
 
-## Conclusions
+## Description
 
-(1) Mr_data shows Mr. Trash Wheel data, with `r length(pull(Mr_data, dumpster))` observations. There are `r length(Mr_data)` key variables: `r colnames(Mr_data)`.
+(1) _Mr_data_ shows Mr. Trash Wheel data, with `r length(pull(Mr_data, dumpster))` observations. There are `r length(Mr_data)` key variables: `r colnames(Mr_data)`.
 
-(2) prec_all shows the combination of 2017 precipitation and 2018 precipitation data, with `r length(pull(prec_all, month))`. observations. There are `r length(prec_all)` key variables: `r colnames(prec_all)`.
+(2) _prec_all_ shows the combination of 2017 precipitation and 2018 precipitation data, with `r length(pull(prec_all, month))`. observations. There are `r length(prec_all)` key variables: `r colnames(prec_all)`.
 
 (3) The the total precipitation in 2018 is `r sum(pull(filter(prec_all, year == 2018), total))`.
 
 (4) The median number of sports balls in a dumpster in 2017 is `r median(pull(filter(Mr_data, year == 2017), sports_balls))`.
 
+# Problem 2
+
+```{r clean_csv, warning = FALSE}
+pols_month = read_csv(file = "../dataset/fivethirtyeight_datasets/pols-month.csv") %>%
+  janitor::clean_names() %>%
+  separate(mon, c("year", "month", "day"), sep = "-") %>%
+  mutate(month = month.name[as.integer(month)]) %>%
+  pivot_longer(
+    cols = starts_with("prez"),
+    names_to = "president",
+    values_to = "value") %>% 
+  filter(value == 1) %>% 
+  select(-day, -value) %>%
+  mutate(
+    president = replace(president, president == "prez_gop", "republican"),
+    president = replace(president, president == "prez_dem", "democrat"))
+  
+
+unemployment = read_csv(file = "../dataset/fivethirtyeight_datasets/unemployment.csv") %>%
+  janitor::clean_names() %>%
+  rename(January = jan, February = feb, March = mar, April = apr,
+         May = may, June = jun, July = jul, August = aug,
+         September = sep, October = oct, November = nov, December = dec) %>%
+  pivot_longer(
+    cols = January:December,
+    names_to = "month",
+    values_to = "unemployment_rate") %>%
+  select(year, month, everything())
+
+snp = read_csv(file = "../dataset/fivethirtyeight_datasets/snp.csv") %>%
+  janitor::clean_names() %>%
+  separate(date, c("month", "day", "year"), sep = "/") %>%
+  mutate(month = month.name[as.integer(month)]) %>%
+  select(year, month, close)
+```
+
+```{r merge_data}
+pols_month_2 = pols_month %>%
+  mutate(date = paste(year, month, sep = "-")) %>%
+  select(date, gov_gop:president)
+
+unemployment_2 = unemployment %>%
+  mutate(date = paste(year, month, sep = "-")) %>%
+  select(date, unemployment_rate)
+
+snp_2 = snp %>%
+  mutate(date = paste(year, month, sep = "-")) %>%
+  select(date, close)
+
+pols_snp = left_join(pols_month_2, snp_2, by = "date")
+pols_snp_unemployment = left_join(pols_snp, unemployment_2, by = "date") %>%
+  separate(date, c("year", "month"), sep = "-")
+```
+
+## Description
+
+(1) The three initial datasets:  _pols_month_ contains the result of each monthly pols; _unemployment_ contains rates of unemployment monthly; _snp_ contains monthly close data.
+
+(2) The resulting dataset _pols_snp_unemployment_ merges data from _pols_month_, _unemployment_ and _snp_, with `r length(pull(pols_snp_unemployment, month))` rows and `r length(pols_snp_unemployment)` columns. It contains data from year `r min(pull(pols_snp_unemployment, year))` to `r max(pull(pols_snp_unemployment, year))`.Its variables are: `r colnames(pols_snp_unemployment)`. "year" and "month" are key variables which merge into "date" to be more accurate.
+
+# Problem 3
