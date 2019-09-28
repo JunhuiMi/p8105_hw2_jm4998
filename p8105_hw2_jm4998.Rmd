@@ -63,7 +63,7 @@ pols_month = read_csv(file = "../dataset/fivethirtyeight_datasets/pols-month.csv
     cols = starts_with("prez"),
     names_to = "president",
     values_to = "value") %>% 
-  filter(value == 1) %>% 
+  filter(value == 1 | value == 2) %>% 
   select(-day, -value) %>%
   mutate(
     president = replace(president, president == "prez_gop", "republican"),
