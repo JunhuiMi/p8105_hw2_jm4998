@@ -1,7 +1,7 @@
 ---
 title: "Homework 2_Data Wrangling_jm4998"
 author: "Junhui Mi"
-date: "2019/9/24"
+date: "2019/9/28"
 output: github_document
 ---
 
@@ -14,7 +14,7 @@ library(readxl)
 
 # Problem 1
 
-_Read data from Excel_
+_Read data from Excel and clean Mr_data_
 
 ```{r read_excel, warning = FALSE}
 Mr_data = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
@@ -44,15 +44,17 @@ prec_all = full_join(prec_2018, prec_2017)
 
 ## Description
 
-(1) _Mr_data_ shows Mr. Trash Wheel data, with `r length(pull(Mr_data, dumpster))` observations. There are `r length(Mr_data)` key variables: `r colnames(Mr_data)`.
+(1) "Mr_data" shows Mr. Trash Wheel data, with `r length(pull(Mr_data, dumpster))` observations. There are `r length(Mr_data)` variables: `r colnames(Mr_data)`; "dumpster" and "sports_balls" are key variables.
 
-(2) _prec_all_ shows the combination of 2017 precipitation and 2018 precipitation data, with `r length(pull(prec_all, month))`. observations. There are `r length(prec_all)` key variables: `r colnames(prec_all)`.
+(2) "prec_all" shows the combination of 2017 precipitation and 2018 precipitation data, with `r length(pull(prec_all, month))`. observations. There are `r length(prec_all)` key variables: `r colnames(prec_all)`.
 
 (3) The the total precipitation in 2018 is `r sum(pull(filter(prec_all, year == 2018), total))`.
 
 (4) The median number of sports balls in a dumpster in 2017 is `r median(pull(filter(Mr_data, year == 2017), sports_balls))`.
 
 # Problem 2
+
+_Read and clean pols_month, unemployment and snp data from csv_
 
 ```{r clean_csv, warning = FALSE}
 pols_month = read_csv(file = "../dataset/fivethirtyeight_datasets/pols-month.csv") %>%
@@ -88,6 +90,8 @@ snp = read_csv(file = "../dataset/fivethirtyeight_datasets/snp.csv") %>%
   select(year, month, close)
 ```
 
+_Left join three datasets by date_
+
 ```{r merge_data}
 pols_month_2 = pols_month %>%
   mutate(date = paste(year, month, sep = "-")) %>%
@@ -108,11 +112,13 @@ pols_snp_unemployment = left_join(pols_snp, unemployment_2, by = "date") %>%
 
 ## Description
 
-(1) The three initial datasets:  _pols_month_ contains the result of each monthly pols; _unemployment_ contains rates of unemployment monthly; _snp_ contains monthly close data.
+(1) The three initial datasets:  "pols_month" contains the result of each monthly pols; "unemployment" contains rates of unemployment monthly; "snp" contains monthly close data.
 
-(2) The resulting dataset _pols_snp_unemployment_ merges data from _pols_month_, _unemployment_ and _snp_, with `r length(pull(pols_snp_unemployment, month))` rows and `r length(pols_snp_unemployment)` columns. It contains data from year `r min(pull(pols_snp_unemployment, year))` to `r max(pull(pols_snp_unemployment, year))`.Its variables are: `r colnames(pols_snp_unemployment)`. "year" and "month" are key variables which merge into "date" to be more accurate.
+(2) The resulting dataset "pols_snp_unemployment" merges data from "pols_month", "unemployment" and “snp”, with `r length(pull(pols_snp_unemployment, month))` rows and `r length(pols_snp_unemployment)` columns. It contains data from year `r min(pull(pols_snp_unemployment, year))` to `r max(pull(pols_snp_unemployment, year))`.Its variables are: `r colnames(pols_snp_unemployment)`. "year" and "month" are key variables which merge into "date" to be more accurate.
 
 # Problem 3
+
+_Read and clean baby names from csv_
 
 ```{r name_csv, warning = FALSE}
 baby_names = read_csv(file = "../dataset/Popular_Baby_Names.csv") %>%
@@ -121,7 +127,11 @@ baby_names = read_csv(file = "../dataset/Popular_Baby_Names.csv") %>%
   distinct() 
 ```
 
-```{r create_table, warning = FALSE}
+The "baby_names" dataset collects `r length(pull(baby_names, year_of_birth))` popular baby name samples from year `r min(pull(baby_names, year_of_birth))` to `r max(pull(baby_names, year_of_birth))`.
+
+_Popularity of the name “Olivia”_
+
+```{r olivia, warning = FALSE}
 baby_names_olivia = baby_names %>%
   filter(childs_first_name == "Olivia", gender == "FEMALE") %>%
   select(year_of_birth, ethnicity, rank) %>%
@@ -129,7 +139,13 @@ baby_names_olivia = baby_names %>%
     names_from = "year_of_birth",
     values_from = "rank")
 baby_names_olivia
+```
 
+The tibble "baby_names_olivia" above shows the rank in popularity of the name “Olivia” as a female baby name over time.
+
+_The most popular male name_
+
+```{r male_names, warning = FALSE}
 popular_male_names = baby_names %>%
   filter(gender == "MALE", rank == "1") %>%
   select(year_of_birth, ethnicity, childs_first_name) %>%
@@ -139,11 +155,18 @@ popular_male_names = baby_names %>%
 popular_male_names
 ```
 
+The tibble "popular_male_names" above shows the most popular name among male children over time.
+
+_Scatter plot of the popularity of names for male, white non-hispanic children born in 2016_
+
 ```{r create_plot, warning = FALSE}
 plot_data = baby_names %>%
   filter(gender == "MALE", ethnicity == "WHITE NON HISPANIC", 
          year_of_birth == "2016")
 ggplot(plot_data, aes(x = rank, y = count)) + 
-  geom_point()
-ggsave("scatter plot of male, white non-hispanic children born in 2016.png")
+  geom_point() +
+  ggtitle("Scatter plot of male, white non-hispanic children born in 2016")
+ggsave("Scatter plot of male, white non-hispanic children born in 2016.png")
 ```
+
+The scatter plot above shows the number of children with a name (y axis) against the rank in popularity of that name (x axis) for male, white non-hispanic children born in 2016.
