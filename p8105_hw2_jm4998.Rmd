@@ -112,7 +112,7 @@ pols_snp_unemployment = left_join(pols_snp, unemployment_2, by = "date") %>%
 
 ## Description
 
-(1) The three initial datasets:  "pols_month" contains the result of each monthly pols; "unemployment" contains rates of unemployment monthly; "snp" contains monthly close data.
+(1) The three initial datasets:  "pols_month" contains 822 observations of 9 variables related to the number of national politicians who are democratic or republican at any given time; "unemployment" contains 68 observations of 13 variables related to unemployment rate; "snp" contains 787 observations of 2 variables related to Standard & Poor’s stock market index (S&P), often used as a representative measure of stock market as a whole.
 
 (2) The resulting dataset "pols_snp_unemployment" merges data from "pols_month", "unemployment" and “snp”, with `r length(pull(pols_snp_unemployment, month))` rows and `r length(pols_snp_unemployment)` columns. It contains data from year `r min(pull(pols_snp_unemployment, year))` to `r max(pull(pols_snp_unemployment, year))`.Its variables are: `r colnames(pols_snp_unemployment)`. "year" and "month" are key variables which merge into "date" to be more accurate.
 
@@ -123,7 +123,11 @@ _Read and clean baby names from csv_
 ```{r name_csv, warning = FALSE}
 baby_names = read_csv(file = "../dataset/Popular_Baby_Names.csv") %>%
   janitor::clean_names() %>%
-  mutate(childs_first_name = str_to_title(childs_first_name)) %>%
+  mutate(childs_first_name = str_to_title(childs_first_name),
+         ethnicity = recode(ethnicity, 
+                            "ASIAN AND PACI" = "ASIAN AND PACIFIC ISLANDER",
+                            "BLACK NON HISP" = "BLACK NON HISPANIC",
+                            "WHITE NON HISP" = "WHITE NON HISPANIC")) %>%
   distinct() 
 ```
 
@@ -137,7 +141,8 @@ baby_names_olivia = baby_names %>%
   select(year_of_birth, ethnicity, rank) %>%
   pivot_wider(
     names_from = "year_of_birth",
-    values_from = "rank")
+    values_from = "rank") %>%
+  knitr::kable(format = "html")
 baby_names_olivia
 ```
 
@@ -151,7 +156,8 @@ popular_male_names = baby_names %>%
   select(year_of_birth, ethnicity, childs_first_name) %>%
   pivot_wider(
     names_from = "year_of_birth",
-    values_from = "childs_first_name")
+    values_from = "childs_first_name") %>%
+  knitr::kable(format = "html")
 popular_male_names
 ```
 
