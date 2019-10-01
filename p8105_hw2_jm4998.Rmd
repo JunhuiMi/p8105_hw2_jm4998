@@ -17,8 +17,8 @@ library(readxl)
 _Read data from Excel and clean Mr_data_
 
 ```{r read_excel, warning = FALSE}
-Mr_data = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
-                     sheet = 1, range = "A2:N336") %>%
+Mr_data = read_excel("../dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+                     sheet = 1, range = "A2:N408") %>%
   janitor::clean_names() %>%
   drop_na(dumpster) %>%
   mutate(sports_balls = as.integer(sports_balls))
@@ -27,14 +27,14 @@ Mr_data = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
 _Join 2017 and 2018 precipitation data_
 
 ```{r join_tables, warning = FALSE}
-prec_2018 = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
-                     sheet = 3, range = "A2:B14") %>%
+prec_2018 = read_excel("../dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+                     sheet = 5, range = "A2:B14") %>%
   janitor::clean_names() %>%
   mutate(year = rep(2018, 12), month = month.name[as.integer(month)]) %>%
   drop_na(total) 
 
-prec_2017 = read_excel("../dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
-                     sheet = 4, range = "A2:B14") %>%
+prec_2017 = read_excel("../dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+                     sheet = 6, range = "A2:B14") %>%
   janitor::clean_names() %>%
   mutate(year = rep(2017, 12), month = month.name[as.integer(month)]) %>%
   drop_na(total)
