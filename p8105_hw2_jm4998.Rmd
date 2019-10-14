@@ -17,7 +17,7 @@ library(readxl)
 _Read data from Excel and clean Mr_data_
 
 ```{r read_excel, warning = FALSE}
-Mr_data = read_excel("../dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+Mr_data = read_excel("./dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
                      sheet = 1, range = "A2:N408") %>%
   janitor::clean_names() %>%
   drop_na(dumpster) %>%
@@ -27,13 +27,13 @@ Mr_data = read_excel("../dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
 _Join 2017 and 2018 precipitation data_
 
 ```{r join_tables, warning = FALSE}
-prec_2018 = read_excel("../dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+prec_2018 = read_excel("./dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
                      sheet = 5, range = "A2:B14") %>%
   janitor::clean_names() %>%
   mutate(year = rep(2018, 12), month = month.name[as.integer(month)]) %>%
   drop_na(total) 
 
-prec_2017 = read_excel("../dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+prec_2017 = read_excel("./dataset/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
                      sheet = 6, range = "A2:B14") %>%
   janitor::clean_names() %>%
   mutate(year = rep(2017, 12), month = month.name[as.integer(month)]) %>%
@@ -57,7 +57,7 @@ prec_all = full_join(prec_2018, prec_2017)
 _Read and clean pols_month, unemployment and snp data from csv_
 
 ```{r clean_csv, warning = FALSE}
-pols_month = read_csv(file = "../dataset/fivethirtyeight_datasets/pols-month.csv") %>%
+pols_month = read_csv(file = "./dataset/fivethirtyeight_datasets/pols-month.csv") %>%
   janitor::clean_names() %>%
   separate(mon, c("year", "month", "day"), sep = "-") %>%
   mutate(month = month.name[as.integer(month)]) %>%
@@ -72,7 +72,7 @@ pols_month = read_csv(file = "../dataset/fivethirtyeight_datasets/pols-month.csv
     president = replace(president, president == "prez_dem", "democrat"))
   
 
-unemployment = read_csv(file = "../dataset/fivethirtyeight_datasets/unemployment.csv") %>%
+unemployment = read_csv(file = "./dataset/fivethirtyeight_datasets/unemployment.csv") %>%
   janitor::clean_names() %>%
   rename(January = jan, February = feb, March = mar, April = apr,
          May = may, June = jun, July = jul, August = aug,
@@ -83,7 +83,7 @@ unemployment = read_csv(file = "../dataset/fivethirtyeight_datasets/unemployment
     values_to = "unemployment_rate") %>%
   select(year, month, everything())
 
-snp = read_csv(file = "../dataset/fivethirtyeight_datasets/snp.csv") %>%
+snp = read_csv(file = "./dataset/fivethirtyeight_datasets/snp.csv") %>%
   janitor::clean_names() %>%
   separate(date, c("month", "day", "year"), sep = "/") %>%
   mutate(month = month.name[as.integer(month)]) %>%
@@ -121,7 +121,7 @@ pols_snp_unemployment = left_join(pols_snp, unemployment_2, by = "date") %>%
 _Read and clean baby names from csv_
 
 ```{r name_csv, warning = FALSE}
-baby_names = read_csv(file = "../dataset/Popular_Baby_Names.csv") %>%
+baby_names = read_csv(file = "./dataset/Popular_Baby_Names.csv") %>%
   janitor::clean_names() %>%
   mutate(childs_first_name = str_to_title(childs_first_name),
          ethnicity = recode(ethnicity, 
